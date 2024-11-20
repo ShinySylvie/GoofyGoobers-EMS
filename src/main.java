@@ -8,7 +8,7 @@ public class main {
     public static void main(String[] args)
     {
         //the popup of our application
-        JFrame app = new JFrame();
+        JFrame app = new JFrame("Employee Management System");
         //main container
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -21,6 +21,29 @@ public class main {
         JButton AddEbuttonS1oyee = new JButton("Add Employee");
         JButton DeleteEbuttonS1oyee = new JButton("Delete Employee");
         JButton UpdateEbuttonS1oyee = new JButton("Update Employee");
+        JButton UpdateSalaries = new JButton("Update Salaries");
+                UpdateSalaries.addActionListener(new ActionListener() {
+          
+            // Override the actionPerformed() method
+            public void actionPerformed(ActionEvent e){
+                
+                salarypopup(app);
+
+            }
+          
+        });
+        JButton GenerateReports = new JButton("Generate Report");
+        GenerateReports.addActionListener(new ActionListener() {
+          
+            // Override the actionPerformed() method
+            public void actionPerformed(ActionEvent e){
+                
+                reports(app);
+
+            }
+          
+        });
+
 
         JRadioButton name = new JRadioButton("via name");
         JRadioButton ssn = new JRadioButton("via SSN");
@@ -55,6 +78,8 @@ public class main {
         buttonS1.add(AddEbuttonS1oyee);
         buttonS1.add(DeleteEbuttonS1oyee);
         buttonS1.add(UpdateEbuttonS1oyee);
+        buttonS1.add(UpdateSalaries);
+        buttonS1.add(GenerateReports);
 
         //search panel contents
         search.add(bar);
@@ -76,6 +101,72 @@ public class main {
         app.add(mainPanel);
         app.setSize(1500,1000);
         app.setVisible(true);
+
+
+
     }
+
+
+    public static void salarypopup(JFrame parent) {
+        // Create a JDialog (a popup window)
+        JDialog salaryinfo = new JDialog(parent, "Update Salary", true);
+        salaryinfo.setTitle("Update Salary");
+        salaryinfo.setSize(400, 200);  // Set the size of the dialog
+        salaryinfo.setLocationRelativeTo(null); // Center the dialog
+
+        // Set the layout for the dialog (FlowLayout or GridLayout)
+        salaryinfo.setLayout(new FlowLayout());
+
+        // Create labels and text fields
+        JLabel upperboundLabel = new JLabel("Insert Upper Bound:");
+        JTextField upperbound = new JTextField(20); // The number in the constructor sets the width of the text field
+
+        JLabel lowerboundLabel = new JLabel("Insert Lower Bound:");
+        JTextField lowerbound = new JTextField(20);
+
+        JLabel percentageLabel = new JLabel("Insert Percentage:");
+        JTextField percentage = new JTextField(20);
+
+        // Add labels and text fields to the dialog
+        salaryinfo.add(upperboundLabel);
+        salaryinfo.add(upperbound);
+
+        salaryinfo.add(lowerboundLabel);
+        salaryinfo.add(lowerbound);
+
+        salaryinfo.add(percentageLabel);
+        salaryinfo.add(percentage);
+
+        // Optional: Add a button to confirm the salary update (you can handle the button's action listener as needed)
+        JButton updateButton = new JButton("Update Salary");
+        salaryinfo.add(updateButton);
+
+        // Set dialog visibility
+        salaryinfo.setVisible(true);
+    }
+
+    public static void reports(JFrame parent){
+
+        JDialog generate = new JDialog(parent,"Generate Report", true);
+        generate.setTitle("Generate Report");
+        generate.setSize(400, 200);  // Set the size of the dialog
+        generate.setLocationRelativeTo(null); // Center the dialog
+        JPanel options = new JPanel();
+
+        JButton ByTitle = new JButton("By Title");
+        JButton ByDivision = new JButton("By Division");
+        JButton ByPayHistory = new JButton("By Pay Statement History");
+
+        options.add(ByTitle);
+        options.add(ByDivision);
+        options.add(ByPayHistory);
+
+        generate.add(options);
+        generate.setVisible(true);
+
+        
+
+    }
+
 
 }
