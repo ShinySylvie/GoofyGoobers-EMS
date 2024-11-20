@@ -13,7 +13,7 @@ public class main {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-        JPanel buttonS1 = new JPanel(); //container buttons for manipulation
+        JPanel buttonS1 = new JPanel(); //container for main buttons
         JPanel search = new JPanel(); //container for search abr
         JPanel Display = new JPanel(); //container where the list of employees should appear
         
@@ -38,7 +38,7 @@ public class main {
             // Override the actionPerformed() method
             public void actionPerformed(ActionEvent e){
                 
-                reports(app);
+                reportspopup(app);
 
             }
           
@@ -53,8 +53,8 @@ public class main {
         group.add(ssn);
         group.add(empid);
 
-        JTextField temp = new JTextField("List of employees should show up here."); //just sitting here for visual reasons
-        
+        JTextField emplist = new JTextField("List of employees should show up here."); //just sitting here for visual reasons
+        emplist.setEditable(false);
         JTextField bar = new JTextField("Type here to search EMS");
         bar.setColumns(50);
         bar.addFocusListener(new FocusListener() {
@@ -72,6 +72,10 @@ public class main {
                 }
             }
         });
+        bar.addActionListener(e -> {
+            String input = bar.getText(); // Get the text
+            emplist.setText("Query submitted: "+input);//just testing that pressing enter works
+        });
 
 
         //buttonS1 panel contents
@@ -88,9 +92,8 @@ public class main {
         search.add(empid);
 
         //display panel contents
-        Display.add(temp);
         Display.setLayout(new BorderLayout());  // Center-aligns the text field in the display panel
-        Display.add(temp, BorderLayout.CENTER);
+        Display.add(emplist, BorderLayout.CENTER);
 
         //add all panels to the main panel 
         mainPanel.add(buttonS1);
@@ -145,7 +148,7 @@ public class main {
         salaryinfo.setVisible(true);
     }
 
-    public static void reports(JFrame parent){
+    public static void reportspopup(JFrame parent){
 
         JDialog generate = new JDialog(parent,"Generate Report", true);
         generate.setTitle("Generate Report");
