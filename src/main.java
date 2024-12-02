@@ -114,15 +114,13 @@ public class main {
         // Create a JDialog (a popup window)
         JDialog salaryinfo = new JDialog(parent, "Update Salary", true);
         salaryinfo.setTitle("Update Salary");
-        salaryinfo.setSize(400, 200);  // Set the size of the dialog
-        salaryinfo.setLocationRelativeTo(null); // Center the dialog
-
-        // Set the layout for the dialog (FlowLayout or GridLayout)
+        salaryinfo.setSize(400, 200);
+        salaryinfo.setLocationRelativeTo(null);
         salaryinfo.setLayout(new FlowLayout());
 
         // Create labels and text fields
         JLabel upperboundLabel = new JLabel("Insert Upper Bound:");
-        JTextField upperbound = new JTextField(20); // The number in the constructor sets the width of the text field
+        JTextField upperbound = new JTextField(20);
 
         JLabel lowerboundLabel = new JLabel("Insert Lower Bound:");
         JTextField lowerbound = new JTextField(20);
@@ -140,20 +138,48 @@ public class main {
         salaryinfo.add(percentageLabel);
         salaryinfo.add(percentage);
 
-        // Optional: Add a button to confirm the salary update (you can handle the button's action listener as needed)
         JButton updateButton = new JButton("Update Salary");
         salaryinfo.add(updateButton);
 
-        // Set dialog visibility
+
+        updateButton.addActionListener(new ActionListener() {
+            String result = "";
+            public void actionPerformed(ActionEvent e){
+                System.out.println("You've pressed the update button!"); //debug message
+                try {
+                    // Parse user inputs
+                    double lower = Double.parseDouble(lowerbound.getText());
+                    double upper = Double.parseDouble(upperbound.getText());
+                    double percent = Double.parseDouble(percentage.getText());
+            
+                    // Call the method to update salaries
+                    result = SalaryUpdater.updateSalary(lower, upper, percent);
+                    //error if input isn't a number
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(salaryinfo, "Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                //text area for result to show up in
+                JTextArea updated = new JTextArea();
+                updated.setEditable(false);
+                salaryinfo.add(updated);
+
+                updated.setText(result);
+                
+
+            }
+          
+        });
+        // make salaryinfo visible
         salaryinfo.setVisible(true);
+        
     }
 
     public static void reportspopup(JFrame parent){
 
         JDialog generate = new JDialog(parent,"Generate Report", true);
         generate.setTitle("Generate Report");
-        generate.setSize(400, 200);  // Set the size of the dialog
-        generate.setLocationRelativeTo(null); // Center the dialog
+        generate.setSize(400, 200);
+        generate.setLocationRelativeTo(null);
         JPanel options = new JPanel();
 
         JButton ByTitle = new JButton("By Title");
