@@ -1,54 +1,35 @@
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Scanner;
-public class deleteEmployee 
-{
-    private static final Scanner scanner = new Scanner(System.in);
-    // Start DeleteEmployee method
 
-    public static void DeleteEmployee(Connection connection)
-    {
-        
-        // SQL delete statement
-        // Prompt user to enter the ID of the employee to delete
-        System.out.print("\nEnter employee s'ID to delete : ");
-        int empid = scanner.nextInt();
-        String sqlDelete = "DELETE FROM employees WHERE empid = ?";
+public class deleteEmployee {
 
-        try (
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlDelete);
-            
-            ) 
-        {
+    public static void DeleteEmployee(Connection connection) {
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.println("\n--- Delete Employee ---");
 
-            // Set the search value as a parameter for each criterion
-            preparedStatement.setInt(1, empid);
+            // Prompt user for the employee SSN
+            System.out.print("Enter Employee SSN to delete: ");
+            String ssn = scanner.nextLine();
 
-            // Execute the delete statement
-            int rowsDeleted = preparedStatement.executeUpdate();
+            // SQL delete statement
+            String sqlDelete = "DELETE FROM employees WHERE SSN = ?";
 
+            // Prepare and execute the statement
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sqlDelete)) {
+                preparedStatement.setString(1, ssn);
 
-            // Check if the deleted was successful
-
-            if(rowsDeleted>0)
-            {
-                System.out.println("\n The employee with employee ID: "  +empid + " was successfully deleted.\n\n");
-            
+                int rowsDeleted = preparedStatement.executeUpdate();
+                if (rowsDeleted > 0) {
+                    System.out.println("Employee deleted successfully!");
+                } else {
+                    System.out.println("No employee found with the given SSN.");
+                }
             }
-            else
-            {
-                System.out.println("No Employee found with ID: " + empid +"\n");
-
-            }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.out.println("ERROR: " + e.getMessage());
-        } finally 
-        {
         }
-        
     }
-
-    // End Of DeleteEmployee
-
-
 }
+
