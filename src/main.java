@@ -32,6 +32,94 @@ public class main {
             }
           
         });
+
+        // Action: Add Employee
+        addEmployeeButton.addActionListener(e -> {
+            JDialog addDialog = new JDialog(app, "Add Employee", true);
+            addDialog.setLayout(new FlowLayout());
+            addDialog.setSize(400, 300);
+
+            JTextField fname = new JTextField(20);
+            JTextField lname = new JTextField(20);
+            JTextField email = new JTextField(20);
+            JTextField hireDate = new JTextField(10);
+            JTextField salary = new JTextField(10);
+            JTextField ssn = new JTextField(15);
+
+            addDialog.add(new JLabel("First Name:"));
+            addDialog.add(fname);
+            addDialog.add(new JLabel("Last Name:"));
+            addDialog.add(lname);
+            addDialog.add(new JLabel("Email:"));
+            addDialog.add(email);
+            addDialog.add(new JLabel("Hire Date (YYYY-MM-DD):"));
+            addDialog.add(hireDate);
+            addDialog.add(new JLabel("Salary:"));
+            addDialog.add(salary);
+            addDialog.add(new JLabel("SSN:"));
+            addDialog.add(ssn);
+
+            JButton submit = new JButton("Submit");
+            addDialog.add(submit);
+
+            submit.addActionListener(submitEvent -> {
+                try (Connection connection = DatabaseConnection.getConnection()) {
+                    String sql = "INSERT INTO employees (fname, lname, email, hiredate, salary, ssn) VALUES (?, ?, ?, ?, ?, ?)";
+                    PreparedStatement stmt = connection.prepareStatement(sql);
+                    stmt.setString(1, fname.getText());
+                    stmt.setString(2, lname.getText());
+                    stmt.setString(3, email.getText());
+                    stmt.setString(4, hireDate.getText());
+                    stmt.setDouble(5, Double.parseDouble(salary.getText()));
+                    stmt.setString(6, ssn.getText());
+
+                    int rowsInserted = stmt.executeUpdate();
+                    JOptionPane.showMessageDialog(addDialog, "Employee added successfully!");
+                    addDialog.dispose();
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(addDialog, "Error adding employee: " + ex.getMessage());
+                }
+            });
+
+            addDialog.setVisible(true);
+        });
+
+        // Action: Delete Employee
+        deleteEmployeeButton.addActionListener(e -> {
+            JDialog deleteDialog = new JDialog(app, "Delete Employee", true);
+            deleteDialog.setLayout(new FlowLayout());
+            deleteDialog.setSize(300, 150);
+
+            JTextField ssnField = new JTextField(15);
+            deleteDialog.add(new JLabel("Enter SSN:"));
+            deleteDialog.add(ssnField);
+
+            JButton deleteButton = new JButton("Delete");
+            deleteDialog.add(deleteButton);
+
+            deleteButton.addActionListener(deleteEvent -> {
+                try (Connection connection = DatabaseConnection.getConnection()) {
+                    String sql = "DELETE FROM employees WHERE ssn = ?";
+                    PreparedStatement stmt = connection.prepareStatement(sql);
+                    stmt.setString(1, ssnField.getText());
+
+                    int rowsDeleted = stmt.executeUpdate();
+                    if (rowsDeleted > 0) {
+                        JOptionPane.showMessageDialog(deleteDialog, "Employee deleted successfully!");
+                        deleteDialog.dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(deleteDialog, "No employee found with the given SSN.");
+                    }
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(deleteDialog, "Error deleting employee: " + ex.getMessage());
+                }
+            });
+
+            deleteDialog.setVisible(true);
+        });
+        
+        
+        
         JButton GenerateReports = new JButton("Generate Report");
         GenerateReports.addActionListener(new ActionListener() {
           
