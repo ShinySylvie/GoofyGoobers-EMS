@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class main {
+    private static JTextArea emplist; // Declare as a field
 
     public static void main(String[] args)
     {
@@ -27,7 +28,7 @@ public class main {
             // Override the actionPerformed() method
             public void actionPerformed(ActionEvent e){
                 
-                salarypopup(app);
+                salarypopup(app, emplist);
 
             }
           
@@ -53,7 +54,7 @@ public class main {
         group.add(ssn);
         group.add(empid);
 
-        JTextField emplist = new JTextField("List of employees should show up here."); //just sitting here for visual reasons
+        emplist = new JTextArea("List of employees should show up here."); //just sitting here for visual reasons
         emplist.setEditable(false);
         JTextField bar = new JTextField("Type here to search EMS");
         bar.setColumns(50);
@@ -110,7 +111,7 @@ public class main {
     }
 
 
-    public static void salarypopup(JFrame parent) {
+    public static void salarypopup(JFrame parent, JTextArea field) {
         // Create a JDialog (a popup window)
         JDialog salaryinfo = new JDialog(parent, "Update Salary", true);
         salaryinfo.setTitle("Update Salary");
@@ -159,11 +160,11 @@ public class main {
                     JOptionPane.showMessageDialog(salaryinfo, "Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 //text area for result to show up in
-                JTextArea updated = new JTextArea();
-                updated.setEditable(false);
-                salaryinfo.add(updated);
+                //JTextArea updated = new JTextArea();
+                //field.setEditable(false);
+                //salaryinfo.add(updated);
 
-                updated.setText(result);
+                field.setText(result);
                 
 
             }
