@@ -1,7 +1,6 @@
 import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
 import java.sql.*;
+import javax.swing.*;
 
 public class main {
 
@@ -223,21 +222,11 @@ public class main {
         JButton byDivision = new JButton("By Division");
         JButton byPayHistory = new JButton("By Pay History");
 
-        // Add listeners for each button (you can replace the action with your specific report logic)
-    byTitle.addActionListener(e -> {
-        JOptionPane.showMessageDialog(generate, "Generating report by Title...");
-        // Add your report generation logic here
-    });
-
-    byDivision.addActionListener(e -> {
-        JOptionPane.showMessageDialog(generate, "Generating report by Division...");
-        // Add your report generation logic here
-    });
-
-    byPayHistory.addActionListener(e -> {
-        JOptionPane.showMessageDialog(generate, "Generating report by Pay History...");
-        // Add your report generation logic here
-    });
+        // Add listeners for each button (you can replace the action with your specific
+        // report logic)
+        byTitle.addActionListener(e -> generateReportByTitle(generate));
+        byDivision.addActionListener(e -> generateReportByDivision(generate));
+        byPayHistory.addActionListener(e -> generateReportByPayHistory(generate));
 
         generate.add(byTitle);
         generate.add(byDivision);
@@ -245,30 +234,29 @@ public class main {
 
         generate.setVisible(true);
     }
+
     public static void generateReportByTitle(JDialog generate) {
         try (Connection connection = DatabaseConnection.getConnection()) {
-            // Example query for fetching employees grouped by title
-            String sql = "SELECT title, COUNT(*) AS count FROM employees GROUP BY title";
+            // SQL query to fetch job titles
+            String sql = "SELECT job_title_id, job_title FROM employeedata.job_titles ORDER BY job_title_id ASC";
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
     
-            StringBuilder report = new StringBuilder("Report by Title:\n");
-            boolean hasResults = false;
+            // Building the report
+            StringBuilder report = new StringBuilder("Report by Title:\n\n");
             while (rs.next()) {
-                String title = rs.getString("title");
-                int count = rs.getInt("count");
-                report.append(String.format("Title: %s, Number of Employees: %d%n", title, count));
-                hasResults = true;
+                int jobTitleId = rs.getInt("job_title_id");
+                String jobTitle = rs.getString("job_title");
+                report.append(String.format("ID: %d, Title: %s%n", jobTitleId, jobTitle));
             }
-            if (hasResults) {
-                JOptionPane.showMessageDialog(generate, report.toString(), "Report by Title", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(generate, "No data available for the report.", "No Data", JOptionPane.INFORMATION_MESSAGE);
-            }
+    
+            // Display the report
+            JOptionPane.showMessageDialog(generate, report.toString(), "Report by Title",
+                    JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException ex) {
-            // Log and show error message if there is an exception
-            System.out.println("SQL Error: " + ex.getMessage());
-            JOptionPane.showMessageDialog(generate, "Error generating report: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            // Show error message if SQL exception occurs
+            JOptionPane.showMessageDialog(generate, "Error generating report: " + ex.getMessage(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -278,11 +266,11 @@ public class main {
             String sql = "SELECT ID, Name, city, addressLine1, addressLine2, state, country, postalCode FROM employeeData.division";
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-    
+
             // Check if the query returns any results
             StringBuilder report = new StringBuilder("Report by Division:\n");
             boolean hasResults = false;
-    
+
             while (rs.next()) {
                 int id = rs.getInt("ID");
                 String name = rs.getString("Name");
@@ -292,57 +280,87 @@ public class main {
                 String state = rs.getString("state");
                 String country = rs.getString("country");
                 String postalCode = rs.getString("postalCode");
-    
+
                 report.append(String.format("ID: %d, Name: %s, City: %s, Address: %s, %s, %s, %s, PostalCode: %s%n",
-                    id, name, city, addressLine1, addressLine2, state, country, postalCode));
+                        id, name, city, addressLine1, addressLine2, state, country, postalCode));
                 hasResults = true;
             }
-    
+
             if (hasResults) {
-                JOptionPane.showMessageDialog(generate, report.toString(), "Report by Division", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(generate, report.toString(), "Report by Division",
+                        JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(generate, "No data available for the report.", "No Data", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(generate, "No data available for the report.", "No Data",
+                        JOptionPane.INFORMATION_MESSAGE);
             }
         } catch (SQLException ex) {
             // Log and show error message if there is an exception
             System.out.println("SQL Error: " + ex.getMessage());
-            JOptionPane.showMessageDialog(generate, "Error generating report: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(generate, "Error generating report: " + ex.getMessage(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
-    
-    
+
+    /**
+     * @param generate
+     */
     public static void generateReportByPayHistory(JDialog generate) {
         try (Connection connection = DatabaseConnection.getConnection()) {
-            // Example query for fetching employees and their salary history
-            String sql = "SELECT fname, lname, salary, pay_date FROM pay_history ORDER BY pay_date DESC";
+            // SQL query to fetch payroll details
+            String sql = """
+                    SELECT payID, pay_date, earnings, fed_tax, fed_med, fed_SS, 
+                           state_tax, retire_401k, health_care, empid
+                    FROM employeedata.payroll
+                    ORDER BY pay_date DESC
+                    """;
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
     
-            StringBuilder report = new StringBuilder("Report by Pay History:\n");
+            // Build the report
+            StringBuilder report = new StringBuilder("Report by Pay History:\n\n");
             while (rs.next()) {
-                String fname = rs.getString("fname");
-                String lname = rs.getString("lname");
-                double salary = rs.getDouble("salary");
+                int payID = rs.getInt("payID");
                 Date payDate = rs.getDate("pay_date");
-                report.append(String.format("Employee: %s %s, Salary: %.2f, Pay Date: %s%n", fname, lname, salary, payDate));
+                double earnings = rs.getDouble("earnings");
+                double fedTax = rs.getDouble("fed_tax");
+                double fedMed = rs.getDouble("fed_med");
+                double fedSS = rs.getDouble("fed_SS");
+                double stateTax = rs.getDouble("state_tax");
+                double retire401k = rs.getDouble("retire_401k");
+                double healthCare = rs.getDouble("health_care");
+                int empId = rs.getInt("empid");
+    
+                report.append(String.format("""
+                        Pay ID: %d
+                        Employee ID: %d
+                        Pay Date: %s
+                        Earnings: %.2f
+                        Federal Tax: %.2f
+                        Federal Medicare: %.2f
+                        Federal Social Security: %.2f
+                        State Tax: %.2f
+                        Retirement 401k: %.2f
+                        Health Care: %.2f
+                        ---------------------------------------
+                        """, payID, empId, payDate, earnings, fedTax, fedMed, fedSS, stateTax, retire401k, healthCare));
             }
     
-            JOptionPane.showMessageDialog(generate, report.toString(), "Report by Pay History", JOptionPane.INFORMATION_MESSAGE);
+            // Display the report
+            JOptionPane.showMessageDialog(generate, report.toString(), "Report by Pay History",
+                    JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(generate, "Error generating report: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            // Handle SQL exceptions
+            JOptionPane.showMessageDialog(generate, "Error generating report: " + ex.getMessage(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
-    }
+}}
 
-
-}
-
-
-class DatabaseConnection {
+class DatabaseConnection{
     public static Connection getConnection() throws SQLException {
-        // Replace with your database connection details
         String url = "jdbc:mysql://localhost:3306/your_database";
         String username = "root";
         String password = "Mitakedame12";
-        return DriverManager.getConnection(url, username, password);
+        return DriverManager.getConnection(url,username, password);
     }
 }
+
