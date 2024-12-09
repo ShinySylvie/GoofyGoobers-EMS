@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.sql.*;
 import javax.swing.*;
+import java.awt.event.*;
 
 public class main {
     private static JTextArea emplist; // Declare as a field
@@ -24,10 +25,33 @@ public class main {
         JButton updateEmployeeButton = new JButton("Update Employee");
         JButton updateSalariesButton = new JButton("Update Salaries");
         JButton generateReportsButton = new JButton("Generate Report");
+        JButton clear = new JButton("Clear Results");
 
         // JTextArea to display employee list
         emplist = new JTextArea("List of employees should show up here.");
         emplist.setEditable(false);
+        JTextField bar = new JTextField("Type here to search EMS");
+        bar.setColumns(50);
+        bar.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (bar.getText().equals("Type here to search EMS")) {
+                    bar.setText("");  // Clears the text when the user clicks on it
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (bar.getText().isEmpty()) {
+                    bar.setText("Type here to search EMS");  // Reset placeholder text if empty and not in searchbar
+                }
+            }
+        });
+        bar.addActionListener(e -> {
+            String input = bar.getText(); // Get the text
+            emplist.setText("Query submitted: "+input);//just testing that pressing enter works
+        });
+
         JScrollPane scrollPane = new JScrollPane(emplist);
         display.setLayout(new BorderLayout());
         display.add(scrollPane, BorderLayout.CENTER);
@@ -139,10 +163,15 @@ public class main {
         group.add(ssn);
         group.add(empid);
 
-        JPanel searchPanel = new JPanel();
-        searchPanel.add(name);
-        searchPanel.add(ssn);
-        searchPanel.add(empid);
+        search.add(bar);
+        search.add(name);
+        search.add(ssn);
+        search.add(empid);
+        search.add(clear);
+
+        clear.addActionListener(clearlist -> {
+            fetchAndDisplayEmployees(emplist);
+        });
 
         // Button panel contents
         buttonS1.add(addEmployeeButton);
@@ -153,12 +182,12 @@ public class main {
 
         // Add all panels to the main panel
         mainPanel.add(buttonS1);
-        mainPanel.add(searchPanel);
+        mainPanel.add(search);
         mainPanel.add(display);
 
         // Add mainPanel to application
         app.add(mainPanel);
-        app.setSize(800, 600);
+        app.setSize(1000, 1000);
         app.setVisible(true);
 
         // Fetch and display employee list on load
@@ -227,11 +256,6 @@ public class main {
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(salaryInfo, "Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
-                //text area for result to show up in
-                //JTextArea updated = new JTextArea();
-                //field.setEditable(false);
-                //salaryInfo.add(updated);
-
                 field.setText(result);
                 
 
