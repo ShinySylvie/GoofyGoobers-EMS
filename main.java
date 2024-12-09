@@ -3,6 +3,7 @@ import java.sql.*;
 import javax.swing.*;
 
 public class main {
+    private static JTextArea emplist; // Declare as a field
 
     public static void main(String[] args) {
         // Create the main application window
@@ -25,7 +26,7 @@ public class main {
         JButton generateReportsButton = new JButton("Generate Report");
 
         // JTextArea to display employee list
-        JTextArea emplist = new JTextArea("List of employees should show up here.");
+        emplist = new JTextArea("List of employees should show up here.");
         emplist.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(emplist);
         display.setLayout(new BorderLayout());
@@ -124,7 +125,7 @@ public class main {
         });
 
         // Action: Update Salaries
-        updateSalariesButton.addActionListener(e -> salaryPopup(app));
+        updateSalariesButton.addActionListener(e -> salaryPopup(app, emplist));
 
         // Action: Generate Reports
         generateReportsButton.addActionListener(e -> reportsPopup(app));
@@ -186,7 +187,7 @@ public class main {
         }
     }
 
-    public static void salaryPopup(JFrame parent) {
+    public static void salaryPopup(JFrame parent, JTextArea field) {
         JDialog salaryInfo = new JDialog(parent, "Update Salary", true);
         salaryInfo.setLayout(new FlowLayout());
         salaryInfo.setSize(400, 200);
@@ -209,6 +210,34 @@ public class main {
 
         JButton updateButton = new JButton("Update Salary");
         salaryInfo.add(updateButton);
+
+        updateButton.addActionListener(new ActionListener() {
+            String result = "";
+            public void actionPerformed(ActionEvent e){
+                System.out.println("You've pressed the update button!"); //debug message
+                try {
+                    // Parse user inputs
+                    double lower = Double.parseDouble(lowerBound.getText());
+                    double upper = Double.parseDouble(upperBound.getText());
+                    double percent = Double.parseDouble(percentage.getText());
+            
+                    // Call the method to update salaries
+                    result = SalaryUpdater.updateSalary(lower, upper, percent);
+                    //error if input isn't a number
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(salaryInfo, "Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                //text area for result to show up in
+                //JTextArea updated = new JTextArea();
+                //field.setEditable(false);
+                //salaryInfo.add(updated);
+
+                field.setText(result);
+                
+
+            }
+          
+        });
 
         salaryInfo.setVisible(true);
     }
@@ -354,13 +383,4 @@ public class main {
                     JOptionPane.ERROR_MESSAGE);
         }
 }}
-
-class DatabaseConnection{
-    public static Connection getConnection() throws SQLException {
-        String url = "jdbc:mysql://localhost:3306/your_database";
-        String username = "root";
-        String password = "Mitakedame12";
-        return DriverManager.getConnection(url,username, password);
-    }
-}
 
