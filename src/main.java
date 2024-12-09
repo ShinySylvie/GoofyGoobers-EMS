@@ -151,6 +151,9 @@ public class main {
         // Action: Update Salaries
         updateSalariesButton.addActionListener(e -> salaryPopup(app, emplist));
 
+                // Action: Update Salaries
+        updateEmployeeButton .addActionListener(e -> updateEmpPopup(app, emplist));
+
         // Action: Generate Reports
         generateReportsButton.addActionListener(e -> reportsPopup(app));
 
@@ -251,7 +254,7 @@ public class main {
                     double percent = Double.parseDouble(percentage.getText());
             
                     // Call the method to update salaries
-                    result = SalaryUpdater.updateSalary(lower, upper, percent);
+                    result = Updater.updateSalary(lower, upper, percent);
                     //error if input isn't a number
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(salaryInfo, "Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -264,6 +267,80 @@ public class main {
         });
 
         salaryInfo.setVisible(true);
+    }
+
+    public static void updateEmpPopup(JFrame parent, JTextArea field){
+
+        JDialog empInfo = new JDialog(parent, "Update Salary", true);
+        empInfo.setLayout(new FlowLayout());
+        empInfo.setSize(400, 400);
+
+        JLabel empidLabel = new JLabel("Input employee ID.");
+        JTextField empid = new JTextField(20);
+
+        JLabel fnameLabel = new JLabel("Update First Name:");
+        JTextField fname = new JTextField(20);
+
+        JLabel lnameLabel = new JLabel("Update Last Name:");
+        JTextField lname = new JTextField(20);
+
+        JLabel emailLabel = new JLabel("Update Email:");
+        JTextField email = new JTextField(20);
+
+        JLabel hireDateLabel = new JLabel("Update Hire Date:");
+        JTextField hireDate = new JTextField(10);
+
+        JLabel ssnLabel = new JLabel("Update SSN:");
+        JTextField ssn = new JTextField(15);
+
+        JLabel instructions = new JLabel("Leave field blank if not updating");
+
+        empInfo.add(empidLabel);
+        empInfo.add(empid);
+        empInfo.add(instructions);
+        empInfo.add(fname);
+        empInfo.add(fnameLabel);
+        empInfo.add(lname);
+        empInfo.add(lnameLabel);
+        empInfo.add(email);
+        empInfo.add(emailLabel);
+        empInfo.add(hireDate);
+        empInfo.add(hireDateLabel);
+        empInfo.add(ssn);
+        empInfo.add(ssnLabel);
+
+        JButton updateButton = new JButton("Update Employee");
+        empInfo.add(updateButton);
+
+        updateButton.addActionListener(new ActionListener() {
+            String result = "";
+            public void actionPerformed(ActionEvent e){
+                System.out.println("You've pressed the update button!"); //debug message
+                try {
+                    // Parse user inputs
+                    int EmpID = Integer.parseInt(empid.getText().trim());
+                    String empFname = fname.getText();
+                    String empLname = lname.getText();
+                    String empEmail = email.getText();
+                    String empHiredate = hireDate.getText();
+                    String empSsn = ssn.getText();
+            
+                    // Call the method to update salaries
+                    result = Updater.updateEmployee(EmpID, empFname, empLname, empEmail, empHiredate, empSsn);
+                    //error if input isn't a number
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(empInfo, "Please enter valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                field.setText(result);
+                
+
+            }
+          
+        });
+
+
+        empInfo.setVisible(true);
+
     }
 
     public static void reportsPopup(JFrame parent) {
