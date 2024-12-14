@@ -84,7 +84,7 @@ public class EmployeeSearch {
             for (String employee : employees) {
                 emplist.append(employee + "\n");
             }
-        }
+        } 
     }
 }
 

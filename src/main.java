@@ -205,7 +205,7 @@ public class main {
 
         
         });
-
+ 
         // Button panel contents
         buttonS1.add(addEmployeeButton);
         buttonS1.add(deleteEmployeeButton);
