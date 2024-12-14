@@ -39,15 +39,7 @@ public class main {
         // JTextArea to display employee list
         emplist = new JTextArea("List of employees should show up here.");
         emplist.setEditable(false);
-        List<String> employees = EmployeeSearch.getAllEmployees(); // Fetch all employees
-        if (employees.isEmpty()) {
-            emplist.setText("No employees found in the database.");
-        } else {
-            for (String employee : employees) {
-                emplist.append(employee + "\n");
-            }
-        }
-        
+     
         JTextField bar = new JTextField("Type here to search EMS");
         bar.setColumns(50);
         bar.addFocusListener(new FocusListener() {
@@ -143,7 +135,7 @@ public class main {
 
                     if (rowsInserted > 0) {
                         JOptionPane.showMessageDialog(addDialog, "Employee added successfully!");
-                        fetchAndDisplayEmployees(emplist); // Refresh employee list
+                        EmployeeSearch.updateEmployeeListDisplay(emplist);
                         addDialog.dispose();
                     } else {
                         JOptionPane.showMessageDialog(addDialog, "Error adding employee.");
@@ -178,7 +170,8 @@ public class main {
                     int rowsDeleted = stmt.executeUpdate();
                     if (rowsDeleted > 0) {
                         JOptionPane.showMessageDialog(deleteDialog, "Employee deleted successfully!");
-                        fetchAndDisplayEmployees(emplist); // Refresh employee list
+                        EmployeeSearch.updateEmployeeListDisplay(emplist);
+
                         deleteDialog.dispose();
                     } else {
                         JOptionPane.showMessageDialog(deleteDialog, "No employee found with the given SSN.");
@@ -208,7 +201,9 @@ public class main {
         search.add(clear);
 
         clear.addActionListener(clearlist -> {
-            fetchAndDisplayEmployees(emplist);
+            EmployeeSearch.updateEmployeeListDisplay(emplist);
+
+        
         });
 
         // Button panel contents
@@ -229,30 +224,12 @@ public class main {
         app.setVisible(true);
 
         // Fetch and display employee list on load
-        fetchAndDisplayEmployees(emplist);
+        EmployeeSearch.updateEmployeeListDisplay(emplist);
+
+        
     }
 
-    public static void fetchAndDisplayEmployees(JTextArea emplist) {
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            String sql = "SELECT empid, fname, lname, email FROM employees";
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
 
-            StringBuilder result = new StringBuilder("Employee List:\n");
-            while (rs.next()) {
-                int empid = rs.getInt("empid");
-                String fname = rs.getString("fname");
-                String lname = rs.getString("lname");
-                String email = rs.getString("email");
-
-                result.append(String.format("ID: %d, Name: %s %s, Email: %s%n", empid, fname, lname, email));
-            }
-
-            emplist.setText(result.toString());
-        } catch (SQLException ex) {
-            emplist.setText("Error fetching employees: " + ex.getMessage());
-        }
-    }
 
     public static void salaryPopup(JFrame parent, JTextArea field) {
         JDialog salaryInfo = new JDialog(parent, "Update Salary", true);

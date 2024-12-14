@@ -1,15 +1,11 @@
 import java.sql.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
+import javax.swing.JTextArea;
 
 public class EmployeeSearch {
     
-  public static List<String> searchEmployees(String searchType, String searchValue) {
+    public static List<String> searchEmployees(String searchType, String searchValue) {
         List<String> employees = new ArrayList<>();
 
         try (Connection connection = DatabaseConnection.getConnection()) {
@@ -55,14 +51,14 @@ public class EmployeeSearch {
         return employees;
     }
 
-//method to get all employees for display 
+    // method to get all employees for display
     public static List<String> getAllEmployees() {
         List<String> employees = new ArrayList<>();
         try (Connection connection = DatabaseConnection.getConnection()) {
             String query = "SELECT empid, Fname, Lname, SSN FROM employees";
             PreparedStatement stmt = connection.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
-    
+
             while (rs.next()) {
                 String employee = String.format("ID: %d, Name: %s %s, SSN: %s",
                         rs.getInt("empid"),
@@ -74,9 +70,21 @@ public class EmployeeSearch {
         } catch (SQLException e) {
             System.out.println("Error while fetching employees: " + e.getMessage());
         }
-    
+
         return employees;
     }
-    
 
+    // new
+    public static void updateEmployeeListDisplay(JTextArea emplist) {
+        List<String> employees = getAllEmployees();
+        emplist.setText(""); 
+        if (employees.isEmpty()) {
+            emplist.setText("No employees found in the database.");
+        } else {
+            for (String employee : employees) {
+                emplist.append(employee + "\n");
+            }
+        }
+    }
 }
+
