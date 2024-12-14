@@ -2,6 +2,7 @@ import java.awt.*;
 import java.sql.*;
 import javax.swing.*;
 import java.awt.event.*;
+import java.util.List;
 
 public class main {
     private static JTextArea emplist; // Declare as a field
@@ -27,9 +28,26 @@ public class main {
         JButton generateReportsButton = new JButton("Generate Report");
         JButton clear = new JButton("Clear Results");
 
+        JRadioButton name = new JRadioButton("via Name");
+        JRadioButton ssn = new JRadioButton("via SSN");
+        JRadioButton empid = new JRadioButton("via ID");
+        ButtonGroup group = new ButtonGroup();
+        group.add(name);
+        group.add(ssn);
+        group.add(empid);
+
         // JTextArea to display employee list
         emplist = new JTextArea("List of employees should show up here.");
         emplist.setEditable(false);
+        List<String> employees = EmployeeSearch.getAllEmployees(); // Fetch all employees
+        if (employees.isEmpty()) {
+            emplist.setText("No employees found in the database.");
+        } else {
+            for (String employee : employees) {
+                emplist.append(employee + "\n");
+            }
+        }
+        
         JTextField bar = new JTextField("Type here to search EMS");
         bar.setColumns(50);
         bar.addFocusListener(new FocusListener() {
@@ -48,8 +66,33 @@ public class main {
             }
         });
         bar.addActionListener(e -> {
-            String input = bar.getText(); // Get the text
-            emplist.setText("Query submitted: "+input);//just testing that pressing enter works
+               String searchType = "";
+    if (name.isSelected()) {
+        searchType = "name";
+    } else if (ssn.isSelected()) {
+        searchType = "ssn";
+    } else if (empid.isSelected()) {
+        searchType = "id";
+    } else {
+        emplist.setText("Please select a search type.");
+        return;
+    }
+
+    // Get the search value from the text field
+    String searchValue = bar.getText();
+
+    // Call the DAO method to search employees
+    List<String> results = EmployeeSearch.searchEmployees(searchType, searchValue);
+
+    // Display results in the emplist text area
+    emplist.setText(""); // Clear the previous results
+    if (results.isEmpty()) {
+        emplist.setText("No employees found matching the criteria.");
+    } else {
+        for (String employee : results) {
+            emplist.append(employee + "\n");
+        }
+    }
         });
 
         JScrollPane scrollPane = new JScrollPane(emplist);
@@ -67,7 +110,7 @@ public class main {
             JTextField email = new JTextField(20);
             JTextField hireDate = new JTextField(10);
             JTextField salary = new JTextField(10);
-            JTextField ssn = new JTextField(15);
+            JTextField ssnnum = new JTextField(15);
 
             addDialog.add(new JLabel("First Name:"));
             addDialog.add(fname);
@@ -94,7 +137,7 @@ public class main {
                     stmt.setString(3, email.getText());
                     stmt.setString(4, hireDate.getText());
                     stmt.setDouble(5, Double.parseDouble(salary.getText()));
-                    stmt.setString(6, ssn.getText());
+                    stmt.setString(6, ssnnum.getText());
 
                     int rowsInserted = stmt.executeUpdate();
 
@@ -158,14 +201,6 @@ public class main {
         generateReportsButton.addActionListener(e -> reportsPopup(app));
 
         // Search panel contents
-        JRadioButton name = new JRadioButton("via Name");
-        JRadioButton ssn = new JRadioButton("via SSN");
-        JRadioButton empid = new JRadioButton("via ID");
-        ButtonGroup group = new ButtonGroup();
-        group.add(name);
-        group.add(ssn);
-        group.add(empid);
-
         search.add(bar);
         search.add(name);
         search.add(ssn);
