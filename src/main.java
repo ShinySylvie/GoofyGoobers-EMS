@@ -115,7 +115,7 @@ public class main {
             addDialog.add(new JLabel("Salary:"));
             addDialog.add(salary);
             addDialog.add(new JLabel("SSN:"));
-            addDialog.add(ssn);
+            addDialog.add(ssnnum);
 
             JButton submit = new JButton("Submit");
             addDialog.add(submit);
@@ -283,7 +283,7 @@ public class main {
 
     public static void updateEmpPopup(JFrame parent, JTextArea field){
 
-        JDialog empInfo = new JDialog(parent, "Update Salary", true);
+        JDialog empInfo = new JDialog(parent, "Update Employee", true);
         empInfo.setLayout(new FlowLayout());
         empInfo.setSize(400, 400);
 
@@ -340,8 +340,8 @@ public class main {
                     // Call the method to update salaries
                     result = Updater.updateEmployee(EmpID, empFname, empLname, empEmail, empHiredate, empSsn);
                     //error if input isn't a number
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(empInfo, "Please enter valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(empInfo, "Something has gone wrong.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 field.setText(result);
                 
