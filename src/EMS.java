@@ -1,10 +1,9 @@
 import java.awt.*;
-import java.sql.*;
 import javax.swing.*;
 import java.awt.event.*;
 import java.util.List;
 
-public class main {
+public class EMS {
     private static JTextArea emplist; // Declare as a field
 
     public static void main(String[] args) {
@@ -121,27 +120,22 @@ public class main {
             addDialog.add(submit);
 
             submit.addActionListener(submitEvent -> {
-                try (Connection connection = DatabaseConnection.getConnection()) {
-                    String sql = "INSERT INTO employees (fname, lname, email, hiredate, salary, ssn) VALUES (?, ?, ?, ?, ?, ?)";
-                    PreparedStatement stmt = connection.prepareStatement(sql);
-                    stmt.setString(1, fname.getText());
-                    stmt.setString(2, lname.getText());
-                    stmt.setString(3, email.getText());
-                    stmt.setString(4, hireDate.getText());
-                    stmt.setDouble(5, Double.parseDouble(salary.getText()));
-                    stmt.setString(6, ssnnum.getText());
+                try {
+                    String first = fname.getText();
+                    String last = lname.getText();
+                    String empEmail =  email.getText();
+                    String date =  hireDate.getText();
+                    Double money = Double.parseDouble(salary.getText());
+                    String empSSN = ssnnum.getText();
 
-                    int rowsInserted = stmt.executeUpdate();
+                    String msg = AddDeleteEmp.AddEmployee(money, first, last, empEmail, date, empSSN);
 
-                    if (rowsInserted > 0) {
-                        JOptionPane.showMessageDialog(addDialog, "Employee added successfully!");
-                        EmployeeSearch.updateEmployeeListDisplay(emplist);
-                        addDialog.dispose();
-                    } else {
-                        JOptionPane.showMessageDialog(addDialog, "Error adding employee.");
-                    }
-                } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(addDialog, "Error adding employee: " + ex.getMessage());
+                    JOptionPane.showMessageDialog(addDialog, msg);
+                    EmployeeSearch.updateEmployeeListDisplay(emplist);
+                    addDialog.dispose();
+
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(addDialog, "Error Adding Employee: " + ex.getMessage());
                 }
             });
 
@@ -162,21 +156,15 @@ public class main {
             deleteDialog.add(deleteButton);
 
             deleteButton.addActionListener(deleteEvent -> {
-                try (Connection connection = DatabaseConnection.getConnection()) {
-                    String sql = "DELETE FROM employees WHERE ssn = ?";
-                    PreparedStatement stmt = connection.prepareStatement(sql);
-                    stmt.setString(1, ssnField.getText());
+                try  {
 
-                    int rowsDeleted = stmt.executeUpdate();
-                    if (rowsDeleted > 0) {
-                        JOptionPane.showMessageDialog(deleteDialog, "Employee deleted successfully!");
-                        EmployeeSearch.updateEmployeeListDisplay(emplist);
+                    String SSN = ssnField.getText();
+                    String msg = AddDeleteEmp.DeleteEmployee(SSN);
 
-                        deleteDialog.dispose();
-                    } else {
-                        JOptionPane.showMessageDialog(deleteDialog, "No employee found with the given SSN.");
-                    }
-                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(deleteDialog, msg);
+                    EmployeeSearch.updateEmployeeListDisplay(emplist);
+                    deleteDialog.dispose();
+                } catch (Exception ex) {
                     JOptionPane.showMessageDialog(deleteDialog, "Error deleting employee: " + ex.getMessage());
                 }
             });
@@ -191,7 +179,7 @@ public class main {
         updateEmployeeButton .addActionListener(e -> updateEmpPopup(app, emplist));
 
         // Action: Generate Reports
-        generateReportsButton.addActionListener(e -> reportsPopup(app));
+        generateReportsButton.addActionListener(e -> reportsPopup(app, emplist));
 
         // Search panel contents
         search.add(bar);
@@ -355,7 +343,7 @@ public class main {
 
     }
 
-    public static void reportsPopup(JFrame parent) {
+    public static void reportsPopup(JFrame parent, JTextArea field) {
         JDialog generate = new JDialog(parent, "Generate Report", true);
         generate.setLayout(new FlowLayout());
         generate.setSize(400, 200);
@@ -364,11 +352,52 @@ public class main {
         JButton byDivision = new JButton("By Division");
         JButton byPayHistory = new JButton("By Pay History");
 
-        // Add listeners for each button (you can replace the action with your specific
-        // report logic)
-        byTitle.addActionListener(e -> generateReportByTitle(generate));
-        byDivision.addActionListener(e -> generateReportByDivision(generate));
-        byPayHistory.addActionListener(e -> generateReportByPayHistory(generate));
+
+        byTitle.addActionListener(new ActionListener() {
+            String result = "";
+            public void actionPerformed(ActionEvent e){
+
+                try {
+                    // Call the method to generate report
+                    result = Generate.generateReportByTitle();
+                    //error 
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(generate, "Something has gone wrong.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                field.setText(result);
+            }
+          
+        });
+
+        byDivision.addActionListener(new ActionListener() {
+            String result = "";
+            public void actionPerformed(ActionEvent e){
+
+                try {
+
+                    result = Generate.generateReportByDivision();
+
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(generate, "Something has gone wrong.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                field.setText(result);
+            }
+          
+        });
+
+        byPayHistory.addActionListener(new ActionListener() {
+            String result = "";
+            public void actionPerformed(ActionEvent e){
+
+                try {
+                    result = Generate.generateReportByPayHistory();
+
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(generate, "Something has gone wrong.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                field.setText(result);
+            }
+        });
 
         generate.add(byTitle);
         generate.add(byDivision);
@@ -376,124 +405,5 @@ public class main {
 
         generate.setVisible(true);
     }
-
-    public static void generateReportByTitle(JDialog generate) {
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            // SQL query to fetch job titles
-            String sql = "SELECT job_title_id, job_title FROM employeedata.job_titles ORDER BY job_title_id ASC";
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-    
-            // Building the report
-            StringBuilder report = new StringBuilder("Report by Title:\n\n");
-            while (rs.next()) {
-                int jobTitleId = rs.getInt("job_title_id");
-                String jobTitle = rs.getString("job_title");
-                report.append(String.format("ID: %d, Title: %s%n", jobTitleId, jobTitle));
-            }
-    
-            // Display the report
-            JOptionPane.showMessageDialog(generate, report.toString(), "Report by Title",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } catch (SQLException ex) {
-            // Show error message if SQL exception occurs
-            JOptionPane.showMessageDialog(generate, "Error generating report: " + ex.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
-    public static void generateReportByDivision(JDialog generate) {
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            // Your SQL query for fetching employee division details
-            String sql = "SELECT ID, Name, city, addressLine1, addressLine2, state, country, postalCode FROM employeeData.division";
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-
-            // Check if the query returns any results
-            StringBuilder report = new StringBuilder("Report by Division:\n");
-            boolean hasResults = false;
-
-            while (rs.next()) {
-                int id = rs.getInt("ID");
-                String name = rs.getString("Name");
-                String city = rs.getString("city");
-                String addressLine1 = rs.getString("addressLine1");
-                String addressLine2 = rs.getString("addressLine2");
-                String state = rs.getString("state");
-                String country = rs.getString("country");
-                String postalCode = rs.getString("postalCode");
-
-                report.append(String.format("ID: %d, Name: %s, City: %s, Address: %s, %s, %s, %s, PostalCode: %s%n",
-                        id, name, city, addressLine1, addressLine2, state, country, postalCode));
-                hasResults = true;
-            }
-
-            if (hasResults) {
-                JOptionPane.showMessageDialog(generate, report.toString(), "Report by Division",
-                        JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(generate, "No data available for the report.", "No Data",
-                        JOptionPane.INFORMATION_MESSAGE);
-            }
-        } catch (SQLException ex) {
-            // Log and show error message if there is an exception
-            System.out.println("SQL Error: " + ex.getMessage());
-            JOptionPane.showMessageDialog(generate, "Error generating report: " + ex.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    /**
-     * @param generate
-     */
-    public static void generateReportByPayHistory(JDialog generate) {
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            // SQL query to fetch payroll details
-            String sql = """
-                    SELECT payID, pay_date, earnings, fed_tax, fed_med, fed_SS, 
-                           state_tax, retire_401k, health_care, empid
-                    FROM employeedata.payroll
-                    ORDER BY pay_date DESC
-                    """;
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-    
-            // Build the report
-            StringBuilder report = new StringBuilder("Report by Pay History:\n\n");
-            while (rs.next()) {
-                int payID = rs.getInt("payID");
-                Date payDate = rs.getDate("pay_date");
-                double earnings = rs.getDouble("earnings");
-                double fedTax = rs.getDouble("fed_tax");
-                double fedMed = rs.getDouble("fed_med");
-                double fedSS = rs.getDouble("fed_SS");
-                double stateTax = rs.getDouble("state_tax");
-                double retire401k = rs.getDouble("retire_401k");
-                double healthCare = rs.getDouble("health_care");
-                int empId = rs.getInt("empid");
-    
-                report.append(String.format("""
-                        Pay ID: %d
-                        Employee ID: %d
-                        Pay Date: %s
-                        Earnings: %.2f
-                        Federal Tax: %.2f
-                        Federal Medicare: %.2f
-                        Federal Social Security: %.2f
-                        State Tax: %.2f
-                        Retirement 401k: %.2f
-                        Health Care: %.2f
-                        ---------------------------------------
-                        """, payID, empId, payDate, earnings, fedTax, fedMed, fedSS, stateTax, retire401k, healthCare));
-            }
-    
-            // Display the report
-            JOptionPane.showMessageDialog(generate, report.toString(), "Report by Pay History",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } catch (SQLException ex) {
-            // Handle SQL exceptions
-            JOptionPane.showMessageDialog(generate, "Error generating report: " + ex.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-}}
+}
 
